@@ -9,6 +9,8 @@ import com.siva.ecommerce.exception.BadRequestException;
 import com.siva.ecommerce.exception.ResourceNotFoundException;
 import com.siva.ecommerce.repository.CategoryRepository;
 import com.siva.ecommerce.repository.ProductRepository;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +35,7 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Cacheable(value = "products", key = "#categoryId + '-' + #keyword + '-' + #page + '-' + #size + '-' + #sortBy + '-' + #direction")
     @Transactional(readOnly = true)
     public PageResponse<ProductResponse> getAll(Long categoryId, String keyword,
                                                 int page, int size,
@@ -55,6 +58,7 @@ public class ProductService {
         return toResponse(findOrThrow(id));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse create(ProductRequest request) {
         Category category = findCategoryOrThrow(request.categoryId());
@@ -64,6 +68,7 @@ public class ProductService {
         return toResponse(productRepository.save(product));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public ProductResponse update(Long id, ProductRequest request) {
         Product product = findOrThrow(id);
@@ -73,6 +78,7 @@ public class ProductService {
         return toResponse(productRepository.save(product));
     }
 
+    @CacheEvict(value = "products", allEntries = true)
     @Transactional
     public void delete(Long id) {
         Product product = findOrThrow(id);
