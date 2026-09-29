@@ -37,4 +37,3 @@ target/
 .mvn/
 HELP.md
 *.log
-application.properties
